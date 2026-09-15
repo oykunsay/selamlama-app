@@ -28,13 +28,19 @@ hands = mp_hands.Hands(
 
 
 def get_working_camera():
-    for index in [1, 0, 2]:
-        temp_cap = cv2.VideoCapture(index)
-        if temp_cap.isOpened():
-            ret, _ = temp_cap.read()
-            if ret:
-                return temp_cap
-            temp_cap.release()
+    # Windows'ta varsayılan backend bazı kameralarda bozuk/boş frame
+    # döndürüp "cv::Mat::Mat" assertion hatasına yol açabiliyor.
+    # DirectShow (CAP_DSHOW) backend'i Windows'ta çok daha stabil.
+    backends = [cv2.CAP_DSHOW, cv2.CAP_ANY] if os.name == "nt" else [cv2.CAP_ANY]
+
+    for backend in backends:
+        for index in [1, 0, 2]:
+            temp_cap = cv2.VideoCapture(index, backend)
+            if temp_cap.isOpened():
+                ret, test_frame = temp_cap.read()
+                if ret and test_frame is not None and test_frame.size > 0:
+                    return temp_cap
+                temp_cap.release()
     return None
 
 
@@ -134,8 +140,9 @@ BOX_Y = CARD_Y + CARD_TOTAL_H + 10
 
 while cap.isOpened():
     ret, frame = cap.read()
-    if not ret:
-        break
+    if not ret or frame is None or frame.size == 0:
+        # Bozuk/boş bir kare geldi, bu kareyi atla ve devam et
+        continue
 
     frame = cv2.flip(frame, 1)
     frame = cv2.resize(frame, (FRAME_WIDTH, FRAME_HEIGHT))
