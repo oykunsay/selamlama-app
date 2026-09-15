@@ -21,11 +21,10 @@ jobs:
       - name: Bagimliliklari Yukle
         run: |
           python -m pip install --upgrade pip
-          pip install opencv-python mediapipe pillow numpy pyinstaller
+          pip install opencv-python mediapipe==0.10.14 pillow numpy pyinstaller
 
       - name: Exe Olustur
-        run: |
-          pyinstaller --noconsole --onefile --collect-all mediapipe --hidden-import=mediapipe --hidden-import=mediapipe.python --hidden-import=mediapipe.python.solutions --hidden-import=mediapipe.python.solutions.hands --hidden-import=mediapipe.python.solutions.drawing_utils --add-data "selamlama.gif;." main.py
+        run: pyinstaller --noconsole --onefile --collect-all mediapipe --collect-data mediapipe --collect-binaries mediapipe --collect-submodules mediapipe --hidden-import=mediapipe.python.solutions --hidden-import=mediapipe.python.solutions.hands --hidden-import=mediapipe.python.solutions.drawing_utils --hidden-import=mediapipe.python._framework_bindings --add-data "selamlama.gif;." main.py
 
       - name: Exe Dosyasini Yukle
         uses: actions/upload-artifact@v4
