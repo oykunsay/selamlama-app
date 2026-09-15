@@ -7,11 +7,10 @@ import mediapipe as mp
 import numpy as np
 from PIL import Image
 
-import mediapipe.python.solutions.drawing_utils as mp_draw
-import mediapipe.python.solutions.hands as mp_hands
+mp_hands = mp.solutions.hands
+mp_draw = mp.solutions.drawing_utils
 
 
-# PyInstaller geçici dizin erişim fonksiyonu
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -125,10 +124,10 @@ CARD_TOTAL_W = OVERLAY_W + (2 * PADDING)
 MARGIN_RIGHT = 45
 COMMON_X = FRAME_WIDTH - CARD_TOTAL_W - MARGIN_RIGHT
 
-CARD_Y = 50
+CARD_Y = 40
 CARD_TOTAL_H = OVERLAY_H + (2 * PADDING)
-BOX_H = 54
-BOX_Y = CARD_Y + CARD_TOTAL_H + 15
+BOX_H = 50
+BOX_Y = CARD_Y + CARD_TOTAL_H + 10
 
 while cap.isOpened():
     ret, frame = cap.read()
@@ -190,41 +189,44 @@ while cap.isOpened():
             CARD_Y + PADDING,
         )
 
-    # Sayaç arka planı ve çerçeve (Mavi)
-    badge_roi = frame[BOX_Y : BOX_Y + BOX_H, COMMON_X : COMMON_X + CARD_TOTAL_W]
-    badge_bg = np.zeros_like(badge_roi, dtype=np.uint8)
-    badge_bg[:] = (80, 30, 15)
-    cv2.addWeighted(badge_roi, 0.35, badge_bg, 0.65, 0, badge_roi)
+    # Sayaç arka planı ve mavi çerçeve
+    if BOX_Y + BOX_H <= FRAME_HEIGHT and COMMON_X + CARD_TOTAL_W <= FRAME_WIDTH:
+        badge_roi = frame[
+            BOX_Y : BOX_Y + BOX_H, COMMON_X : COMMON_X + CARD_TOTAL_W
+        ]
+        badge_bg = np.zeros_like(badge_roi, dtype=np.uint8)
+        badge_bg[:] = (80, 30, 15)  # Koyu mavi/lacivert arka plan
+        cv2.addWeighted(badge_roi, 0.35, badge_bg, 0.65, 0, badge_roi)
 
-    cv2.rectangle(
-        frame,
-        (COMMON_X, BOX_Y),
-        (COMMON_X + CARD_TOTAL_W, BOX_Y + BOX_H),
-        (255, 120, 0),
-        2,
-    )
+        cv2.rectangle(
+            frame,
+            (COMMON_X, BOX_Y),
+            (COMMON_X + CARD_TOTAL_W, BOX_Y + BOX_H),
+            (255, 120, 0),  # Canlı Mavi / Cyan çerçeve
+            2,
+        )
 
-    counter_text = f"Selamlasma Sayaci: {wave_counter}"
-    font = cv2.FONT_HERSHEY_SIMPLEX
-    font_scale = 0.70
-    thickness = 2
-    (text_w, text_h), _ = cv2.getTextSize(
-        counter_text, font, font_scale, thickness
-    )
+        counter_text = f"Selamlasma Sayaci: {wave_counter}"
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        font_scale = 0.70
+        thickness = 2
+        (text_w, text_h), _ = cv2.getTextSize(
+            counter_text, font, font_scale, thickness
+        )
 
-    text_x = COMMON_X + (CARD_TOTAL_W - text_w) // 2
-    text_y = BOX_Y + (BOX_H + text_h) // 2
+        text_x = COMMON_X + (CARD_TOTAL_W - text_w) // 2
+        text_y = BOX_Y + (BOX_H + text_h) // 2
 
-    cv2.putText(
-        frame,
-        counter_text,
-        (text_x, text_y),
-        font,
-        font_scale,
-        (255, 255, 255),
-        thickness,
-        cv2.LINE_AA,
-    )
+        cv2.putText(
+            frame,
+            counter_text,
+            (text_x, text_y),
+            font,
+            font_scale,
+            (255, 255, 255),
+            thickness,
+            cv2.LINE_AA,
+        )
 
     cv2.imshow("Robotekno Selamlama", frame)
 
