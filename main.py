@@ -3,9 +3,12 @@ import sys
 import time
 from collections import deque
 import cv2
-import mediapipe as mp
 import numpy as np
 from PIL import Image
+
+import mediapipe as mp
+import mediapipe.python.solutions.hands
+import mediapipe.python.solutions.drawing_utils
 
 mp_hands = mp.solutions.hands
 mp_draw = mp.solutions.drawing_utils
