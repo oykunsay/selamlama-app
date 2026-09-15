@@ -25,7 +25,7 @@ jobs:
 
       - name: Exe Olustur
         run: |
-          pyinstaller --noconsole --onefile --collect-all mediapipe --add-data "selamlama.gif;." main.py
+          pyinstaller --noconsole --onefile --collect-all mediapipe --hidden-import=mediapipe --hidden-import=mediapipe.python --hidden-import=mediapipe.python.solutions --hidden-import=mediapipe.python.solutions.hands --hidden-import=mediapipe.python.solutions.drawing_utils --add-data "selamlama.gif;." main.py
 
       - name: Exe Dosyasini Yukle
         uses: actions/upload-artifact@v4
